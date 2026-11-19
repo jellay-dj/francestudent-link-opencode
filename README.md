@@ -107,7 +107,7 @@ Extrais le fichier ZIP dans un dossier (par exemple `Bureau/bridge-service`).
 
 > Alternative : dans un terminal, tape :
 > ```bash
-> git clone https://github.com/Yormede/france-student-bridge.git
+> git clone https://github.com/jellay-dj/francestudent-link-opencode.git
 > cd france-student-bridge
 > ```
 
@@ -227,7 +227,7 @@ Les conversations creees par le pont vivent dans le projet France Student
 ### Installation rapide
 
 ```bash
-git clone https://github.com/Yormede/france-student-bridge.git
+git clone https://github.com/jellay-dj/francestudent-link-opencode.git
 cd france-student-bridge
 pip install -r requirements.txt
 ```
@@ -563,7 +563,7 @@ MIT — fais-en ce que tu veux. Un petit mot sur le repo fait toujours plaisir.
   <br>
   <b>Si ce projet t'est utile, laisse une etoile sur GitHub.</b>
   <br>
-  <a href="https://github.com/Yormede/france-student-bridge">
-    <img src="https://img.shields.io/github/stars/Yormede/france-student-bridge?style=social" />
+  <a href="https://github.com/jellay-dj/francestudent-link-opencode">
+    <img src="https://img.shields.io/github/stars/jellay-dj/francestudent-link-opencode?style=social" />
   </a>
 </p>
