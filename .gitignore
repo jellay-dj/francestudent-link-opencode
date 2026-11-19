@@ -1,0 +1,52 @@
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+.env
+.env.local
+.env.production
+
+store.json
+store.*.json
+.fs-session.json
+hello.txt
+.chrome-profile/
+sessions.sqlite3
+sessions.sqlite3-shm
+sessions.sqlite3-wal
+opencode.france-student.generated.json
+
+storage/images/*
+!storage/images/.gitkeep
+
+*.tar.gz
+*.zip
+*.log
+
+.venv/
+venv/
+env/
+
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+package-lock.json
+
+# Python
+__pycache__/
+*.pyc
+
+# Scripts SSO automatisé (déprécié — ne pas automatiser le login SSO)
+get_jwt.js
+
+# Journal interne (ne pas publier)
+diary/
+
+# Spécification interne (contient références déploiement et auth legacy)
+projet_spec.md
