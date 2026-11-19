@@ -287,7 +287,6 @@ def _initial_content(messages, tools, directory, *, recovered=False):
     if recovered:
         parts.append("(Reprise de conversation après perte de session.)")
     parts.append("Contexte precedent disponible sur demande (outils de lecture de fichiers).")
-    parts.append("Quand vous avez termine toutes vos actions, ecrivez FIN a la fin de votre reponse.")
     return _truncate_context("\n\n".join(parts))
 
 
