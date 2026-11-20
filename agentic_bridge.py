@@ -284,6 +284,7 @@ def _initial_content(messages, tools, directory, *, recovered=False):
         )
     if directory:
         parts.append(f"WD: {directory}")
+        parts.append("Vous pouvez travailler sur n'importe quel chemin du système, pas seulement dans ce dossier.")
     if recovered:
         parts.append("(Reprise de conversation après perte de session.)")
     parts.append("Contexte precedent disponible sur demande (outils de lecture de fichiers).")
