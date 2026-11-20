@@ -704,7 +704,18 @@ class AgenticBridge:
                     client_tools, tool_plan, stream, enable_web_search,
                 )
             except BridgeError as exc:
-                if exc.code != "upstream_rate_limited":
+                # Un refus de capacité (502 "no responses upstream has
+                # available capacity") ou une limite de rate doivent faire
+                # basculer sur le modèle suivant, pas lever immédiatement.
+                is_capacity_error = (
+                    exc.code in ("upstream_rate_limited", "upstream_request_failed")
+                    and exc.status in (429, 502, 503)
+                    and any(kw in str(exc).lower() for kw in (
+                        "capacity", "unavailable", "overload", "busy",
+                        "limite atteinte", "rate limit",
+                    ))
+                )
+                if not is_capacity_error:
                     raise
                 last_error = exc
                 model_health.block(candidate_model)
@@ -837,6 +848,18 @@ class AgenticBridge:
                     seen_user_count = len(user_messages)
 
             image_urls = extract_openai_images(image_messages)
+            # Aussi extraire les images envoyées dans le champ "images" du corps
+            # de la requête OpenCode (en plus des parties image_url dans le contenu).
+            data_images = data.get("images", []) or []
+            for img in data_images:
+                if isinstance(img, str):
+                    image_urls.append(img)
+                elif isinstance(img, dict):
+                    url = img.get("url", "")
+                    if url:
+                        image_urls.append(url)
+            # Dédupliquer
+            image_urls = list(dict.fromkeys(image_urls))
             self.store.mark_inflight(session_id, request_hash, agent_id, model_name)
             try:
                 image_uploads = _run_async(self._upload_images(image_urls))
