@@ -128,6 +128,10 @@ FS_REUSE_LAST_CHAT = os.environ.get("FS_REUSE_LAST_CHAT", "true").lower() not in
 # model. "majfs" refreshes the France Student model list.
 FS_ACTION_AGENT = os.environ.get("FS_ACTION_AGENT", "majfs")
 
+# OpenCode agent that the bridge runs itself to test the connection to
+# France Student. Sends a simple "$opencodetest" message.
+FS_TEST_AGENT = os.environ.get("FS_TEST_AGENT", "test")
+
 # France Student quotas the bridge stays below on purpose.
 #   - 50 new chats per day (published limit: 50)
 #   - a rolling hourly message budget (published limit: 100 messages/hour)

@@ -96,3 +96,47 @@ def report_refresh(base_url="http://127.0.0.1:8765", config_path=None):
     lines.append("")
     lines.append("Recharge l'application pour voir les nouveaux modeles (/models).")
     return "\n".join(lines)
+
+
+def test_connection(base_url="http://127.0.0.1:8765"):
+    """Test the connection to France Student by sending a simple message.
+
+    Sends ``$opencodetest`` as the user message and returns the model's
+    answer. Used by the ``@test`` agent to verify the bridge is working.
+    """
+    import json
+    import urllib.request
+
+    payload = json.dumps({
+        "messages": [{"role": "user", "content": "$opencodetest"}],
+        "model": "gpt-6-astra",
+        "stream": False,
+    }).encode("utf-8")
+
+    req = urllib.request.Request(
+        f"{base_url}/v1/chat/completions",
+        data=payload,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            data = json.loads(r.read().decode("utf-8"))
+    except Exception as exc:
+        return f"Echec du test de connexion a France Student : {type(exc).__name__}: {exc}"
+
+    choice = data.get("choices", [{}])[0]
+    message = choice.get("message", {})
+    content = message.get("content", "")
+    model = data.get("model", "inconnu")
+    finish_reason = choice.get("finish_reason", "inconnu")
+
+    lines = [
+        f"Test de connexion a France Student reussi.",
+        f"Modele utilise : {model}",
+        f"Statut : {finish_reason}",
+        "",
+        "Reponse du modele :",
+        content or "[vide]",
+    ]
+    return "\n".join(lines)
