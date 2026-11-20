@@ -132,6 +132,10 @@ FS_ACTION_AGENT = os.environ.get("FS_ACTION_AGENT", "majfs")
 # France Student. Sends a simple "$opencodetest" message.
 FS_TEST_AGENT = os.environ.get("FS_TEST_AGENT", "test")
 
+# OpenCode agent that the bridge runs itself to report France Student usage
+# and quotas. Calls the local /usage endpoint and formats the result.
+FS_USAGE_AGENT = os.environ.get("FS_USAGE_AGENT", "usage")
+
 # France Student quotas the bridge stays below on purpose.
 #   - 50 new chats per day (published limit: 50)
 #   - a rolling hourly message budget (published limit: 100 messages/hour)

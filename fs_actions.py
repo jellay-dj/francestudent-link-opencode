@@ -140,3 +140,83 @@ def test_connection(base_url="http://127.0.0.1:8765"):
         content or "[vide]",
     ]
     return "\n".join(lines)
+
+
+def get_usage(base_url="http://127.0.0.1:8765"):
+    """Fetch France Student usage and quotas from the bridge.
+
+    Calls the local /usage endpoint and returns a human readable report.
+    """
+    import json
+    import urllib.request
+
+    try:
+        with urllib.request.urlopen(f"{base_url}/usage", timeout=30) as r:
+            data = json.loads(r.read().decode("utf-8"))
+    except Exception as exc:
+        return f"Echec de recupération de l'usage France Student : {type(exc).__name__}: {exc}"
+
+    bridge = data.get("bridge", {})
+    messages = bridge.get("messages", {})
+    new_chats = bridge.get("newChats", {})
+
+    lines = [
+        "Usage et quotas France Student",
+        "================================",
+        "",
+    ]
+
+    # Bridge-side quotas
+    msg_limit = messages.get("limit", "?")
+    msg_used = messages.get("used", "?")
+    msg_remaining = messages.get("remaining", "?")
+    msg_window = messages.get("window_seconds", 3600)
+    msg_window_h = int(msg_window // 3600) if isinstance(msg_window, (int, float)) else 1
+
+    chat_limit = new_chats.get("limit", "?")
+    chat_used = new_chats.get("used", "?")
+    chat_remaining = new_chats.get("remaining", "?")
+
+    lines.append("Cote pont (guards bridges) :")
+    lines.append(f"  Messages par heure : {msg_used}/{msg_limit} (reste {msg_remaining})")
+    lines.append(f"  Nouvelles conversations par jour : {chat_used}/{chat_limit} (reste {chat_remaining})")
+    lines.append("")
+
+    # France Student side
+    fs = data.get("franceStudent", {})
+    chat_budget = fs.get("chatBudget", {})
+    if chat_budget:
+        used_pct = chat_budget.get("usedPercent", 0)
+        remaining_pct = chat_budget.get("remainingPercent", 0)
+        reset_at = chat_budget.get("resetAt", "")
+        lines.append("Cote France Student (compte) :")
+        lines.append(f"  Budget chat utilise : {used_pct:.1f}% (reste {remaining_pct:.1f}%)")
+        if reset_at:
+            lines.append(f"  Remise a zero : {reset_at}")
+        lines.append("")
+
+    # Rate limits
+    rate_limits = fs.get("rateLimits", [])
+    if rate_limits:
+        lines.append("Limites de taux actives :")
+        for rl in rate_limits:
+            name = rl.get("bucket", "inconnu")
+            limit = rl.get("limit", "?")
+            remaining = rl.get("remaining", "?")
+            used = rl.get("used", "?")
+            pct = rl.get("remainingPercent", 0)
+            lines.append(f"  {name} : {used}/{limit} (reste {remaining}, {pct:.0f}%)")
+        lines.append("")
+
+    # Token usage
+    tokens = data.get("tokens", {})
+    if tokens and any(tokens.values()):
+        lines.append("Consommation de tokens :")
+        lines.append(f"  Total : {tokens.get('totalTokenCount', 0):,}")
+        lines.append(f"  Prompt : {tokens.get('promptTokenCount', 0):,}")
+        lines.append(f"  Completion : {tokens.get('candidatesTokenCount', 0):,}")
+        lines.append(f"  Reasoning : {tokens.get('reasoningTokenCount', 0):,}")
+        lines.append("")
+
+    lines.append("Requete effectuee via GET /usage sur le pont local.")
+    return "\n".join(lines)
