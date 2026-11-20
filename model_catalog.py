@@ -1,6 +1,9 @@
 """Model aliases and OpenAI catalogue helpers."""
 
 
+import re
+
+
 # Compatibility aliases for older bridge clients. They route to the closest
 # currently available France Student agent and are documented as deprecated.
 DEPRECATED_MODEL_ALIASES = {
@@ -22,6 +25,18 @@ IMAGE_MODEL_ALIASES = {
 }
 
 
+def _normalize_model_name(value):
+    """Normalise un nom de modèle pour la comparaison.
+
+    Supprime espaces, tirets, underscores et points pour permettre de
+    matcher "Claude Opus 5.5", "claude-opus-5-5" ou "claude_opus_5_5"
+    indifféremment.
+    """
+    if not isinstance(value, str):
+        return ""
+    return re.sub(r"[\s_\-\.]+", "", value.strip().lower())
+
+
 def canonical_model_name(value):
     if not isinstance(value, str):
         return value
@@ -30,7 +45,12 @@ def canonical_model_name(value):
 
 
 def resolve_agent(model_value, models):
-    """Resolve an agent ID, model ID, display name or deprecated alias."""
+    """Resolve an agent ID, model ID, display name or deprecated alias.
+
+    La comparaison est insensible aux espaces, tirets, underscores et
+    points : "Claude Opus 5.5", "claude-opus-5-5" ou "claude_opus_5_5"
+    résolvent tous vers le même agent.
+    """
     if isinstance(model_value, bool):
         return None
     if isinstance(model_value, int):
@@ -41,14 +61,14 @@ def resolve_agent(model_value, models):
     requested = canonical_model_name(model_value)
     if not isinstance(requested, str):
         return None
-    requested_lower = requested.lower()
+    requested_norm = _normalize_model_name(requested)
     for model in models:
         candidates = {
-            str(model.get("id", "")).lower(),
-            str(model.get("name", "")).lower(),
-            str(model.get("model", "")).lower(),
+            _normalize_model_name(model.get("id", "")),
+            _normalize_model_name(model.get("name", "")),
+            _normalize_model_name(model.get("model", "")),
         }
-        if requested_lower in candidates:
+        if requested_norm and requested_norm in candidates:
             return model["id"]
     return None
 
