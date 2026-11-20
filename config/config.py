@@ -136,6 +136,11 @@ FS_TEST_AGENT = os.environ.get("FS_TEST_AGENT", "test")
 # and quotas. Calls the local /usage endpoint and formats the result.
 FS_USAGE_AGENT = os.environ.get("FS_USAGE_AGENT", "usage")
 
+# OpenCode agent that the bridge runs itself to report restart instructions
+# for the bridge and OpenCode. Does not restart anything itself (the bridge
+# cannot restart its own process), but gives the exact commands to run.
+FS_RELANCE_AGENT = os.environ.get("FS_RELANCE_AGENT", "relance")
+
 # France Student quotas the bridge stays below on purpose.
 #   - 50 new chats per day (published limit: 50)
 #   - a rolling hourly message budget (published limit: 100 messages/hour)

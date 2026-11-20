@@ -220,3 +220,48 @@ def get_usage(base_url="http://127.0.0.1:8765"):
 
     lines.append("Requete effectuee via GET /usage sur le pont local.")
     return "\n".join(lines)
+
+
+def get_relance_instructions():
+    """Donne les instructions pour relancer le pont et OpenCode.
+
+    Le pont ne peut pas se redemarrer tout seul (il s'arreterait sans pouvoir
+    se relancer), donc cette fonction retourne les commandes exactes a executer
+    manuellement pour relancer le pont et recharger OpenCode.
+    """
+    lines = [
+        "Relance du pont France Student et d'OpenCode",
+        "============================================",
+        "",
+        "1. Arreter le pont (bridge) :",
+        "   - Fenetre console du pont : Ctrl+C",
+        "   - Ou depuis PowerShell :",
+        "       Get-CimInstance Win32_Process -Filter \\\"Name='python.exe'\\\" |",
+        "         Where-Object { $_.CommandLine -match 'bridge_server' } |",
+        "         ForEach-Object { Stop-Process -Id $_.ProcessId -Force }",
+        "",
+        "2. Relancer le pont :",
+        "   - Windows : double-cliquez sur run.bat",
+        "   - Ou : python bridge_server.py",
+        "   - Ou (fenetre cachee) :",
+        "       Start-Process python -ArgumentList \\\"bridge_server.py\\\" -WorkingDirectory $PWD -WindowStyle Hidden",
+        "",
+        "3. Verifier que le pont est en ligne :",
+        "   curl http://localhost:8765/health",
+        "   (doit retourner authenticated: true)",
+        "",
+        "4. Recharger OpenCode :",
+        "   - Dans OpenCode : Ctrl+Shift+P -> \"Reload Window\"",
+        "   - Ou fermez et rouvrez l'application OpenCode",
+        "",
+        "5. Recharger le catalogue des modeles :",
+        "   - Invoquez @majfs dans OpenCode",
+        "   - Ou : python scripts/export_opencode_config.py --apply-config <chemin_opencode_json>",
+        "",
+        "6. Tester :",
+        "   - Invoquez @test dans OpenCode",
+        "",
+        "Si le probleme persiste, verifiez que votre session France Student est",
+        "encore valide (scripts/fs_session_login.js).",
+    ]
+    return "\n".join(lines)

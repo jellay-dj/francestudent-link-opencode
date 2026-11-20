@@ -10,6 +10,7 @@ from config.config import (
     DEFAULT_IMAGE_MODEL, MAX_RETRIES, RETRY_DELAYS, MAX_UPLOAD_BYTES, FS_ACTION_AGENT,
     FS_TEST_AGENT,
     FS_USAGE_AGENT,
+    FS_RELANCE_AGENT,
 )
 from auth import AuthManager
 from api_client import FranceStudentAPI
@@ -22,7 +23,7 @@ from agentic_bridge import (
     model_health,
 )
 from fs_status import fetch_status
-from fs_actions import report_refresh, test_connection, get_usage
+from fs_actions import report_refresh, test_connection, get_usage, get_relance_instructions
 from sse_parser import extract_output_from_events
 from image_handler import download_images_from_output, upload_openai_image
 from openai_adapter import (
@@ -549,6 +550,28 @@ def openai_chat_completions():
     # Usage agent: reports France Student quotas and token usage.
     if agent and agent.strip().lower() == FS_USAGE_AGENT.strip().lower():
         report = get_usage(f"http://{SERVER_HOST}:{SERVER_PORT}")
+        completion = openai_response_to_sse(
+            {
+                "content": {"text": report},
+                "finishedReason": "completed",
+                "model": data.get("model") or "",
+            },
+            data.get("model") or "",
+            delta_mode=bool(data.get("stream", False)),
+        )
+        completion["bridge_action"] = agent
+        if data.get("stream", False):
+            payload = json.dumps(completion, ensure_ascii=False)
+            return Response(
+                f"data: {payload}\n\ndata: [DONE]\n\n",
+                mimetype="text/event-stream",
+                headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+            )
+        return jsonify(completion)
+
+    # Relance agent: reports restart instructions for the bridge and OpenCode.
+    if agent and agent.strip().lower() == FS_RELANCE_AGENT.strip().lower():
+        report = get_relance_instructions()
         completion = openai_response_to_sse(
             {
                 "content": {"text": report},
